@@ -4,30 +4,67 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Tic-Tac-Toe</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=JetBrains+Mono:wght@500;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div class="msgContainer hide">
-        <p id="msg">Winner</p>
-        <button id="newBtn">New Game</button>
-    </div>
-   <main>
-        <h1 class="heading">Tic Tac Toe</h1>
-        <div class="container">
-             <div class="game">
-                <button class="box"></button>
-                <button class="box"></button>
-                <button class="box"></button>
-                <button class="box"></button>
-                <button class="box"></button>
-                <button class="box"></button>
-                <button class="box"></button>
-                <button class="box"></button>
-                <button class="box"></button>
+
+    <button class="theme-toggle" id="themeToggle" aria-label="Toggle dark mode">
+        <span class="icon icon-sun">☀</span>
+        <span class="icon icon-moon">☾</span>
+    </button>
+
+    <main>
+        <h1 class="heading">Tic <span>Tac</span> Toe</h1>
+
+        <section class="scoreboard" aria-label="Scoreboard">
+            <div class="score-card player-x">
+                <span class="score-label">Player X</span>
+                <span class="score-value" id="scoreX">0</span>
+            </div>
+
+            <div class="turn-indicator" id="turnIndicator">
+                <span class="turn-label">Turn</span>
+                <span class="turn-mark" id="turnMark">X</span>
+            </div>
+
+            <div class="score-card player-o">
+                <span class="score-label">Player O</span>
+                <span class="score-value" id="scoreO">0</span>
+            </div>
+        </section>
+
+        <p class="draws">Draws: <span id="scoreDraws">0</span></p>
+
+        <div class="board-wrap">
+            <div class="game" id="game">
+                <button class="box" data-index="0"></button>
+                <button class="box" data-index="1"></button>
+                <button class="box" data-index="2"></button>
+                <button class="box" data-index="3"></button>
+                <button class="box" data-index="4"></button>
+                <button class="box" data-index="5"></button>
+                <button class="box" data-index="6"></button>
+                <button class="box" data-index="7"></button>
+                <button class="box" data-index="8"></button>
+
+                <div class="win-line-container" id="winLineContainer"></div>
             </div>
         </div>
-        <button class="resetbtn">reset button</button>
-   </main>
-   <script src="app.js"></script>
+
+        <button class="resetbtn" id="resetBtn">Reset Round</button>
+    </main>
+
+    <div class="msgContainer hide" id="msgContainer">
+        <div class="msgCard">
+            <p id="msg">Winner</p>
+            <button id="newBtn">Play Again</button>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
 </body>
 </html>

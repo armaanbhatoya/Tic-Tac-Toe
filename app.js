@@ -1,78 +1,132 @@
-let boxes = document.querySelectorAll(".box");
-let resetBtn = document.querySelector(".resetbtn");
+// ---------- Element references ----------
+const boxes = document.querySelectorAll(".box");
+const resetBtn = document.querySelector("#resetBtn");
+const newBtn = document.querySelector("#newBtn");
+const msgContainer = document.querySelector("#msgContainer");
+const msg = document.querySelector("#msg");
+const themeToggle = document.querySelector("#themeToggle");
 
-let msgContainer =  document.querySelector(".msgContainer");
-let msg =  document.querySelector("#msg");
-let newBtn =  document.querySelector("#newBtn");
+const scoreXEl = document.querySelector("#scoreX");
+const scoreOEl = document.querySelector("#scoreO");
+const scoreDrawsEl = document.querySelector("#scoreDraws");
+const turnMarkEl = document.querySelector("#turnMark");
+const winLineContainer = document.querySelector("#winLineContainer");
 
-let turnO = true;
+// ---------- Game state ----------
+let isXTurn = true;
+let boardFull = () => [...boxes].every((box) => box.innerText !== "");
 
+const scores = { X: 0, O: 0, Draws: 0 };
+
+// Each pattern is paired with the CSS class used to draw its winning line.
 const winPatterns = [
-    [0, 1, 2],
-    [0, 3, 6],
-    [0, 4, 8],
-    [1, 4, 7],
-    [2, 5, 8],
-    [2, 4, 6],
-    [3, 4, 5],
-    [6, 7, 8]
+    { cells: [0, 1, 2], line: "row-0" },
+    { cells: [0, 3, 6], line: "col-0" },
+    { cells: [0, 4, 8], line: "diag-main" },
+    { cells: [1, 4, 7], line: "col-1" },
+    { cells: [2, 5, 8], line: "col-2" },
+    { cells: [2, 4, 6], line: "diag-anti" },
+    { cells: [3, 4, 5], line: "row-1" },
+    { cells: [6, 7, 8], line: "row-2" },
 ];
 
-const resetGame = ()=>{
-    turnO = true;
-    enableBoxes();
+// ---------- Core game actions ----------
+const playMove = (box) => {
+    box.innerText = isXTurn ? "X" : "O";
+    box.classList.add(isXTurn ? "mark-x" : "mark-o");
+    box.disabled = true;
+
+    isXTurn = !isXTurn;
+    updateTurnIndicator();
+
+    const winPattern = getWinPattern();
+    if (winPattern) {
+        handleWin(winPattern);
+    } else if (boardFull()) {
+        handleDraw();
+    }
+};
+
+const getWinPattern = () => {
+    return winPatterns.find(({ cells }) => {
+        const [a, b, c] = cells.map((i) => boxes[i].innerText);
+        return a !== "" && a === b && b === c;
+    });
+};
+
+const handleWin = (pattern) => {
+    const winner = boxes[pattern.cells[0]].innerText;
+    scores[winner] += 1;
+    updateScoreboard();
+
+    pattern.cells.forEach((i) => boxes[i].classList.add("win-cell"));
+    drawWinLine(pattern.line);
+
+    msg.innerText = `${winner} wins the round!`;
+    msgContainer.classList.remove("hide");
+    disableBoxes();
+};
+
+const handleDraw = () => {
+    scores.Draws += 1;
+    updateScoreboard();
+
+    msg.innerText = "It's a draw!";
+    msgContainer.classList.remove("hide");
+    disableBoxes();
+};
+
+const drawWinLine = (lineClass) => {
+    const line = document.createElement("div");
+    line.classList.add("win-line", lineClass);
+    winLineContainer.appendChild(line);
+};
+
+// ---------- Reset helpers ----------
+const clearBoard = () => {
+    boxes.forEach((box) => {
+        box.innerText = "";
+        box.disabled = false;
+        box.classList.remove("mark-x", "mark-o", "win-cell");
+    });
+    winLineContainer.innerHTML = "";
+};
+
+const disableBoxes = () => {
+    boxes.forEach((box) => (box.disabled = true));
+};
+
+const startNewRound = () => {
+    isXTurn = true;
+    clearBoard();
+    updateTurnIndicator();
     msgContainer.classList.add("hide");
 };
 
+// ---------- UI updates ----------
+const updateTurnIndicator = () => {
+    turnMarkEl.innerText = isXTurn ? "X" : "O";
+    turnMarkEl.classList.toggle("is-o", !isXTurn);
+};
+
+const updateScoreboard = () => {
+    scoreXEl.innerText = scores.X;
+    scoreOEl.innerText = scores.O;
+    scoreDrawsEl.innerText = scores.Draws;
+};
+
+// ---------- Event listeners ----------
 boxes.forEach((box) => {
-    box.addEventListener("click", ()=>{
-        if(turnO){
-            box.innerText = "X";
-            turnO = false;
-        }
-        else{
-            box.innerText = "O";
-            turnO = true;
-        }
-
-        box.disabled = true;
-
-        checkWinner();
-    })
+    box.addEventListener("click", () => playMove(box));
 });
 
-const enableBoxes = ()=>{
-    boxes.forEach((box)=>{
-        box.disabled = false;
-        box.innerText = "";
-    });
-}
+resetBtn.addEventListener("click", startNewRound);
+newBtn.addEventListener("click", startNewRound);
 
-const disableBoxes = ()=>{
-    boxes.forEach((box)=>{
-        box.disabled = true;
-    });
-}
+themeToggle.addEventListener("click", () => {
+    document.body.classList.toggle("dark");
+});
 
-const showWinner = (winner) => {
-    msg.innerText = `Congrats! ${winner} is the Winner`;
-    msgContainer.classList.remove("hide");
-    disableBoxes();
-}
-
-const checkWinner = () =>{
-    winPatterns.forEach((pattern)=>{
-        let pos1 = boxes[pattern[0]].innerText;
-        let pos2 = boxes[pattern[1]].innerText;
-        let pos3 = boxes[pattern[2]].innerText;
-
-        if(pos1!="" && pos2!="" && pos3!=""){
-            if(pos1 === pos2 && pos2 === pos3) {
-                showWinner(pos1);
-            }
-        }
-    });
-}
-
-newBtn.addEventListener("click", resetGame);
-resetBtn.addEventListener("click", resetGame);
+// ---------- Init ----------
+updateTurnIndicator();
+updateScoreboard();
